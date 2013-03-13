@@ -1,0 +1,1 @@
+"moai.exe " "config.lua" "main.lua"
