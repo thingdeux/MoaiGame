@@ -3,9 +3,26 @@ require "values_you_can_edit"
 values = values_you_can_edit
 
 --Various global Variables
-player1 = {-500, -400, 1, false}
-player2 = {0, 0, 2}
+player1 = {}
+player2 = {}
 chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.!1234567890/*-+()&^%$#@!~`{}[]":;?><,'
+
+function set_player_vars(player)
+  player.x = -510
+  player.y = 0
+  player.speed = 2
+  
+  player.move = {
+    left = false,
+    right = false
+  }
+
+  player.jump = false
+  player.onGround = true
+end
+
+set_player_vars(player1)
+
 
 --Initialize the viewport and create a layer
 function initViewport()
@@ -24,6 +41,7 @@ function initViewport()
   layer:setViewport(viewport)
   MOAIRenderMgr.pushRenderPass(layer)
 end
+
 
 
 
@@ -46,12 +64,13 @@ function initGraphics()
 	debugtext:setFont(font)
 	debugtext:setTextSize(7.15,163)
 	debugtext:setYFlip(true)
-	debugtext:setRect(320, 240, 0, 0)
-	debugtext:setAlignment(MOAITextBox.LEFT_JUSTIFY,MOAITextBox.TOP_JUSTIFY)
+	debugtext:setRect(-320, -440, 0, 0)
+	debugtext:setAlignment(MOAITextBox.LEFT_JUSTIFY,MOAITextBox.BOTTOM_JUSTIFY)
+  debugtext:moveLoc(-180, 370)
 	
 	prop = MOAIProp2D.new()		
 	prop:setDeck (tileSheet)	
-	prop:setLoc(-500,-400)		
+	prop:setLoc(player1.x,player1.y)
 
 	curve = MOAIAnimCurve.new()
 	
@@ -59,46 +78,108 @@ function initGraphics()
   --Set number of keyframes in the animation
   curve:reserveKeys ( values.animation_keyframes )
 
-  --Set the order and time between frames
-  --Structure (Order # In Animation, Time Delay, Frame to Pull on the Sheet, MOAItransitionStyle)
-  curve:setKey ( 1, 0.00, 1, MOAIEaseType.FLAT )
-  curve:setKey ( 2, 0.05, 2, MOAIEaseType.FLAT )
-  curve:setKey ( 3, 0.10, 3, MOAIEaseType.FLAT )
-  curve:setKey ( 4, 0.15, 4, MOAIEaseType.FLAT )
-  curve:setKey ( 5, 0.20, 5, MOAIEaseType.FLAT )
-  curve:setKey ( 6, 0.25, 6, MOAIEaseType.FLAT )
-  curve:setKey ( 7, 0.30, 7, MOAIEaseType.FLAT )
-  curve:setKey ( 8, 0.35, 8, MOAIEaseType.FLAT )
-  curve:setKey ( 9, 0.40, 9, MOAIEaseType.FLAT )
-  curve:setKey ( 10, 0.45, 10, MOAIEaseType.FLAT )
-  curve:setKey ( 11, 0.50, 1, MOAIEaseType.FLAT )
+  function set_keys(animobj)
+  for keys, values in pairs(values.curvekeys) do
+      local builder = {}
+    for key,value in pairs(values) do
+        builder[#builder + 1] = value
+    end
+  animobj:setKey(builder[1], builder[2], builder[3], builder[4])
+  end
+end
+ 
+  set_keys(curve)
 
   anim = MOAIAnim:new ()
-	anim:reserveLinks ( 1 )
-	anim:setLink ( 1, curve, prop, MOAIProp2D.ATTR_INDEX )
-	anim:setMode ( MOAITimer.LOOP )
+  anim:reserveLinks ( 1 )
+  anim:setLink ( 1, curve, prop, MOAIProp2D.ATTR_INDEX )
+  anim:setMode ( MOAITimer.LOOP )
   
   layer:insertProp( debugtext )
   layer:insertProp ( prop )
 
-	end									   
-
-
-
   
 
+end									   
+
+---Function to handle debug information
+
+
+function debug(debugvalues, numberofvalues)
+  local builder = ''
+  for i=1,numberofvalues do
+    builder = builder .. " " .. tostring(debugvalues[i])
+  end
+
+   debugtext:setString(builder)
+end
+
+
+
+function playerControl(key, down)
+  if key == 100 then
+    player1.move.right = down
+  elseif key == 97 then
+    player1.move.left = down
+  end
+
+  if key == 119 and down and player1.onground then
+    player1.jump = true
+  end
+end
+
+playerThread = MOAIThread.new()
+playerThread:run ( function()
+    
+    while true do
+
+      if player1.onGround then
+          
+        if player1.move.right and not player1.move.left then
+          anim:start()
+          player1.x = player1.x + 20
+        elseif player1.move.left and not player1.move.right then
+          anim:start()
+          player1.x = player1.x - 20
+        else
+          player1.x = player1.x
+        end
+      end 
+
+      prop:setLoc(player1.x,player1.y)
+      coroutine.yield()
+    end 
+end )
+
+
+
+---Controller handler
 if (MOAIInputMgr.device.keyboard) then
 	MOAIInputMgr.device.keyboard:setCallback(
 		function(key,down)
-			if down == true then
-				anim:start()
+			if down then
+        playerControl(key,down)
+				
+        --player1.move.right = true
+        
 			else
 				anim:stop()
+        player1.move.right = false
+        player1.move.left = false
 			end
 		end
 	)
 end
 
+debugThread = MOAIThread.new()
+debugThread:run( function()
+    while true do
+      debug( {"Player1 Location: ", "X:",player1.x, "Y:", player1.y, "Right:", player1.move.right, "Left:",player1.move.left}, 9 )
+      coroutine.yield() 
+    end
+      
+end )
+
+
 initViewport()
 initGraphics(layer)
-
