@@ -149,11 +149,11 @@ playerThread:run ( function()
           
         if player1.move.right and not player1.move.left then
           anim:start()
-          player1.x = player1.x + 20
+          player1.x = player1.x + 10
           player1.isIdle = False
         elseif player1.move.left and not player1.move.right then
           anim:start()
-          player1.x = player1.x - 20
+          player1.x = player1.x - 10
           player1.isIdle = False
         else
           player1.isIdle = True
