@@ -19,6 +19,7 @@ function set_player_vars(player)
 
   player.jump = false
   player.onGround = true
+  player.isIdle = true
 end
 
 set_player_vars(player1)
@@ -72,14 +73,17 @@ function initGraphics()
 	prop:setDeck (tileSheet)	
 	prop:setLoc(player1.x,player1.y)
 
+
 	curve = MOAIAnimCurve.new()
+  idlecurve = MOAIAnimCurve.new()
 	
 
   --Set number of keyframes in the animation
   curve:reserveKeys ( values.animation_keyframes )
+  idlecurve:reserveKeys (values.idle_animation_keyframes)
 
-  function set_keys(animobj)
-  for keys, values in pairs(values.curvekeys) do
+  function set_keys(animobj,keyloc)
+  for keys, values in pairs(keyloc) do
       local builder = {}
     for key,value in pairs(values) do
         builder[#builder + 1] = value
@@ -88,13 +92,21 @@ function initGraphics()
   end
 end
  
-  set_keys(curve)
+  set_keys(curve,values.curvekeys)
+  set_keys(idlecurve,values.idle_curvekeys)
 
   anim = MOAIAnim:new ()
   anim:reserveLinks ( 1 )
   anim:setLink ( 1, curve, prop, MOAIProp2D.ATTR_INDEX )
   anim:setMode ( MOAITimer.LOOP )
-  
+  anim:apply(4)
+
+  idleanim = MOAIAnim:new()
+  idleanim:reserveLinks (1)
+  idleanim:setLink(1, idlecurve, prop, MOAIProp2D.ATTR_INDEX)
+  idleanim:setMode ( MOAITimer.LOOP)
+  idleanim:start()
+
   layer:insertProp( debugtext )
   layer:insertProp ( prop )
 
@@ -138,11 +150,16 @@ playerThread:run ( function()
         if player1.move.right and not player1.move.left then
           anim:start()
           player1.x = player1.x + 20
+          player1.isIdle = False
         elseif player1.move.left and not player1.move.right then
           anim:start()
           player1.x = player1.x - 20
+          player1.isIdle = False
         else
+          player1.isIdle = True
           player1.x = player1.x
+
+
         end
       end 
 
@@ -159,11 +176,11 @@ if (MOAIInputMgr.device.keyboard) then
 		function(key,down)
 			if down then
         playerControl(key,down)
-				
-        --player1.move.right = true
         
 			else
+        anim:apply(4)
 				anim:stop()
+        idleanim:start()
         player1.move.right = false
         player1.move.left = false
 			end
@@ -171,10 +188,13 @@ if (MOAIInputMgr.device.keyboard) then
 	)
 end
 
+
+--Initialize Debug Thread
 debugThread = MOAIThread.new()
 debugThread:run( function()
     while true do
-      debug( {"Player1 Location: ", "X:",player1.x, "Y:", player1.y, "Right:", player1.move.right, "Left:",player1.move.left}, 9 )
+      debug( {"Player1 Location: ", "X:",player1.x, "Y:", 
+        player1.y, "Right:", player1.move.right, "Left:",player1.move.left}, 9 )
       coroutine.yield() 
     end
       
