@@ -1,1 +1,0 @@
-set BUNDLE_NAME=../tools/sample.moai
