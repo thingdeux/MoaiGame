@@ -1,12 +1,23 @@
 module(..., package.seeall);
 
 --Set Screen/Resolution Size
-resolutionWidth = 1024
-resolutionHeight = 768
+resolutionWidth = 1280
+resolutionHeight = 1024
+
+--Player Size Control (Smaller numbers = smaller character)
+playerScaleX = 250
+playerScaleY = 250
+
+--Player Velocity
+playerVelocity = 6
+
+--Wind Resistance
+windResistance = playerVelocity / 2 - 2
+
 --Name of SpriteSheet (to be placed in the same directory)
 tilesheetlocation = "smurf_sprite.png"
 
---How many images are on each column of the main tilesheet
+--How many images are on each row of the main tilesheet
 tilesheet_rows_across = 4
 --How many columns exist in the main tilesheet
 tilesheet_columns = 4

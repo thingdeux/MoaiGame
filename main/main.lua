@@ -9,7 +9,7 @@ chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.!1234567890/*-+()&
 
 function set_player_vars(player)
   player.x = -510
-  player.y = 0
+  player.y = -512
   player.speed = 2
   
   player.move = {
@@ -20,6 +20,11 @@ function set_player_vars(player)
   player.jump = false
   player.onGround = true
   player.isIdle = true
+  player.facing = {
+    right = true,
+    left = false
+   }
+
 end
 
 set_player_vars(player1)
@@ -36,7 +41,7 @@ function initViewport()
 
   viewport = MOAIViewport.new()
   viewport:setSize(screenWidth,screenHeight)		
-  viewport:setScale(screenWidth,screenHeight)		
+  viewport:setScale(1280,1024)		
 
   layer = MOAILayer2D.new()	
   layer:setViewport(viewport)
@@ -55,7 +60,7 @@ function initGraphics()
 	--Set the number of rows horizontally and vertically that exist in the sheet
 	tileSheet:setSize (values.tilesheet_rows_across, values.tilesheet_columns)
 	--Determine size of the image on the screen
-	tileSheet:setRect( 0, 0, 300, 300)
+	tileSheet:setRect( 0, 0, values.playerScaleX, values.playerScaleY)
 	
 
 	font = MOAIFont.new()
@@ -67,7 +72,7 @@ function initGraphics()
 	debugtext:setYFlip(true)
 	debugtext:setRect(-320, -440, 0, 0)
 	debugtext:setAlignment(MOAITextBox.LEFT_JUSTIFY,MOAITextBox.BOTTOM_JUSTIFY)
-  debugtext:moveLoc(-180, 370)
+  debugtext:moveLoc(-320, 512)
 	
 	prop = MOAIProp2D.new()		
 	prop:setDeck (tileSheet)	
@@ -117,7 +122,8 @@ end
 ---Function to handle debug information
 
 
-function debug(debugvalues, numberofvalues)
+function debug(debugvalues)
+  local numberofvalues = #debugvalues
   local builder = ''
   for i=1,numberofvalues do
     builder = builder .. " " .. tostring(debugvalues[i])
@@ -126,13 +132,58 @@ function debug(debugvalues, numberofvalues)
    debugtext:setString(builder)
 end
 
+function playerTransition(player,key)
+  if player.facing.left and key == 100 then
+    player.facing.right = true
+    player.facing.left = false
+    tileSheet:setRect( 0, 0, values.playerScaleX, values.playerScaleY)
+    player1.move.right = true
+    player1.x = player1.x - values.playerScaleX
+  elseif player.facing.right and key == 97 then
+    player.facing.left = true
+    player.facing.right = false
+    tileSheet:setRect( 0, 0, -values.playerScaleX, values.playerScaleY)
+    player1.move.left = true
+    player1.x = player1.x + values.playerScaleX
+
+  end
+
+end
+
 
 
 function playerControl(key, down)
-  if key == 100 then
-    player1.move.right = down
-  elseif key == 97 then
-    player1.move.left = down
+--'D' key press for going right
+  if key == 100 and down then
+    if player1.facing.left then
+      playerTransition(player1, key)
+    else
+      player1.move.right = down
+    end
+--'D' key released
+  elseif key == 100 and not down and player1.onGround then
+    anim:stop()
+    idleanim:start()
+    player1.isIdle = true
+    player1.move.right = false
+
+--'A' key press for going left
+  elseif key == 97 and down then
+    if player1.facing.right then
+
+      playerTransition(player1, key)
+    else
+      player1.move.left = down
+    end
+--'A' key released
+  elseif key == 97 and not down and player1.onGround then
+    anim:stop()
+    idleanim:start()
+    player1.isIdle = true
+    player1.move.left = false
+
+  elseif key == 97 and key == 100 then
+    player1.isIdle = true
   end
 
   if key == 119 and down and player1.onground then
@@ -148,16 +199,22 @@ playerThread:run ( function()
       if player1.onGround then
           
         if player1.move.right and not player1.move.left then
-          anim:start()
-          player1.x = player1.x + 10
           player1.isIdle = False
+          anim:start()
+          player1.x = player1.x + values.playerVelocity - values.windResistance
+            if player1.x > values.resolutionWidth / 2 then
+              player1.x = -values.resolutionWidth /2 - values.playerScaleX
+            end
+          
         elseif player1.move.left and not player1.move.right then
-          anim:start()
-          player1.x = player1.x - 10
           player1.isIdle = False
+          anim:start()
+          player1.x = player1.x - values.playerVelocity + values.windResistance
+            if player1.x < -values.resolutionWidth / 2 then
+              player1.x = values.resolutionWidth / 2 + values.playerScaleX / 2
+            end
         else
           player1.isIdle = True
-          player1.x = player1.x
 
 
         end
@@ -176,13 +233,11 @@ if (MOAIInputMgr.device.keyboard) then
 		function(key,down)
 			if down then
         playerControl(key,down)
-        
+      
 			else
-        anim:apply(4)
-				anim:stop()
-        idleanim:start()
-        player1.move.right = false
-        player1.move.left = false
+
+        playerControl(key,down)
+        
 			end
 		end
 	)
@@ -194,7 +249,7 @@ debugThread = MOAIThread.new()
 debugThread:run( function()
     while true do
       debug( {"Player1 Location: ", "X:",player1.x, "Y:", 
-        player1.y, "Right:", player1.move.right, "Left:",player1.move.left}, 9 )
+        player1.y, "Right:", player1.move.right, "Left:",player1.move.left, "Resistance", values.windResistance})
       coroutine.yield() 
     end
       
