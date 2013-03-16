@@ -10,7 +10,7 @@ chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.!1234567890/*-+()&
 function set_player_vars(player)
   player.x = -510
   player.y = -512
-  player.speed = 2
+  player.speed = 0
   
   player.move = {
     left = false,
@@ -164,7 +164,6 @@ function playerControl(key, down)
   elseif key == 100 and not down and player1.onGround then
     anim:stop()
     idleanim:start()
-    player1.isIdle = true
     player1.move.right = false
 
 --'A' key press for going left
@@ -179,7 +178,6 @@ function playerControl(key, down)
   elseif key == 97 and not down and player1.onGround then
     anim:stop()
     idleanim:start()
-    player1.isIdle = true
     player1.move.left = false
 
   elseif key == 97 and key == 100 then
@@ -199,22 +197,45 @@ playerThread:run ( function()
       if player1.onGround then
           
         if player1.move.right and not player1.move.left then
-          player1.isIdle = False
+          player1.isIdle = false
           anim:start()
-          player1.x = player1.x + values.playerVelocity - values.windResistance
+            --Ramp up speed by adding 1 to speed until it hits max velocity
+            if player1.speed < values.playerVelocity then player1.speed = player1.speed + 1 end
+
+          --If the player gets to the edge of the screen going right, place him on the left edge
             if player1.x > values.resolutionWidth / 2 then
               player1.x = -values.resolutionWidth /2 - values.playerScaleX
             end
           
         elseif player1.move.left and not player1.move.right then
-          player1.isIdle = False
+          player1.isIdle = false
           anim:start()
-          player1.x = player1.x - values.playerVelocity + values.windResistance
+            --Ramp up speed by adding 1 to speed until it hits max velocity
+            if player1.speed < values.playerVelocity then player1.speed = player1.speed + 1 end
+
+          --If the player gets to the edge of the screen going left, place him on the right edge
             if player1.x < -values.resolutionWidth / 2 then
               player1.x = values.resolutionWidth / 2 + values.playerScaleX / 2
             end
-        else
-          player1.isIdle = True
+
+        elseif not player1.move.left and not player1.move.right and player1.speed == 0 then
+          player1.isIdle = true
+        end
+        
+
+        if player1.isIdle == false then
+            
+          if player1.facing.right then
+            player1.x = player1.x + player1.speed
+            player1.speed = player1.speed - values.windResistance / 2
+          else
+            player1.x = player1.x - player1.speed
+            player1.speed = player1.speed - values.windResistance / 2
+          end
+
+        
+        
+        
 
 
         end
@@ -249,7 +270,7 @@ debugThread = MOAIThread.new()
 debugThread:run( function()
     while true do
       debug( {"Player1 Location: ", "X:",player1.x, "Y:", 
-        player1.y, "Right:", player1.move.right, "Left:",player1.move.left, "Resistance", values.windResistance})
+        player1.y, "  Right:", player1.move.right, "  Left:",player1.move.left, "  Idle: ", player1.isIdle, "  Speed: ", player1.speed})
       coroutine.yield() 
     end
       

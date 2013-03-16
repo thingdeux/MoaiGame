@@ -8,11 +8,12 @@ resolutionHeight = 1024
 playerScaleX = 250
 playerScaleY = 250
 
---Player Velocity
+--Player's Max Velocity --Determines how fast they can go
 playerVelocity = 6
 
---Wind Resistance
-windResistance = playerVelocity / 2 - 2
+--World Variables
+windResistance = 1
+gravity = 2
 
 --Name of SpriteSheet (to be placed in the same directory)
 tilesheetlocation = "smurf_sprite.png"
