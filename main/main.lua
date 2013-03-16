@@ -11,6 +11,7 @@ function set_player_vars(player)
   player.x = -510
   player.y = -512
   player.speed = 0
+  player.jumpSpeed = 0
   
   player.move = {
     left = false,
@@ -33,17 +34,17 @@ set_player_vars(player1)
 --Initialize the viewport and create a layer
 function initViewport()
   screenWidth = MOAIEnvironment.screenWidth
-  screenHeight = MOAIEnvironment.screenHeight	
+  screenHeight = MOAIEnvironment.screenHeight 
   if screenWidth == nil then screenWidth = values.resolutionWidth end
   if screenHeight == nil then screenHeight = values.resolutionHeight end
 
-  MOAISim.openWindow("Window", screenWidth,	screenHeight)
+  MOAISim.openWindow("Window", screenWidth, screenHeight)
 
   viewport = MOAIViewport.new()
-  viewport:setSize(screenWidth,screenHeight)		
-  viewport:setScale(1280,1024)		
+  viewport:setSize(screenWidth,screenHeight)    
+  viewport:setScale(1280,1024)    
 
-  layer = MOAILayer2D.new()	
+  layer = MOAILayer2D.new() 
   layer:setViewport(viewport)
   MOAIRenderMgr.pushRenderPass(layer)
 end
@@ -54,34 +55,34 @@ end
 ------Initialize the graphics
 function initGraphics()
   
-	tileSheet = MOAITileDeck2D.new ()
-	--Place the sprite sheet in the same folder and enter its name here
-	tileSheet:setTexture (values.tilesheetlocation)
-	--Set the number of rows horizontally and vertically that exist in the sheet
-	tileSheet:setSize (values.tilesheet_rows_across, values.tilesheet_columns)
-	--Determine size of the image on the screen
-	tileSheet:setRect( 0, 0, values.playerScaleX, values.playerScaleY)
-	
+  tileSheet = MOAITileDeck2D.new ()
+  --Place the sprite sheet in the same folder and enter its name here
+  tileSheet:setTexture (values.tilesheetlocation)
+  --Set the number of rows horizontally and vertically that exist in the sheet
+  tileSheet:setSize (values.tilesheet_rows_across, values.tilesheet_columns)
+  --Determine size of the image on the screen
+  tileSheet:setRect( 0, 0, values.playerScaleX, values.playerScaleY)
+  
 
-	font = MOAIFont.new()
-	font:loadFromTTF('arial-rounded.TTF',chars,7.15,163)
+  font = MOAIFont.new()
+  font:loadFromTTF('arial-rounded.TTF',chars,7.15,163)
 
-	debugtext = MOAITextBox.new()
-	debugtext:setFont(font)
-	debugtext:setTextSize(7.15,163)
-	debugtext:setYFlip(true)
-	debugtext:setRect(-320, -440, 0, 0)
-	debugtext:setAlignment(MOAITextBox.LEFT_JUSTIFY,MOAITextBox.BOTTOM_JUSTIFY)
+  debugtext = MOAITextBox.new()
+  debugtext:setFont(font)
+  debugtext:setTextSize(7.15,163)
+  debugtext:setYFlip(true)
+  debugtext:setRect(-320, -440, 640, 0)
+  debugtext:setAlignment(MOAITextBox.LEFT_JUSTIFY,MOAITextBox.BOTTOM_JUSTIFY)
   debugtext:moveLoc(-320, 512)
-	
-	prop = MOAIProp2D.new()		
-	prop:setDeck (tileSheet)	
-	prop:setLoc(player1.x,player1.y)
+  
+  prop = MOAIProp2D.new()   
+  prop:setDeck (tileSheet)  
+  prop:setLoc(player1.x,player1.y)
 
 
-	curve = MOAIAnimCurve.new()
+  curve = MOAIAnimCurve.new()
   idlecurve = MOAIAnimCurve.new()
-	
+  
 
   --Set number of keyframes in the animation
   curve:reserveKeys ( values.animation_keyframes )
@@ -117,7 +118,7 @@ end
 
   
 
-end									   
+end                    
 
 ---Function to handle debug information
 
@@ -161,7 +162,7 @@ function playerControl(key, down)
       player1.move.right = down
     end
 --'D' key released
-  elseif key == 100 and not down and player1.onGround then
+  elseif key == 100 and not down then
     anim:stop()
     idleanim:start()
     player1.move.right = false
@@ -169,24 +170,31 @@ function playerControl(key, down)
 --'A' key press for going left
   elseif key == 97 and down then
     if player1.facing.right then
-
       playerTransition(player1, key)
     else
       player1.move.left = down
     end
 --'A' key released
-  elseif key == 97 and not down and player1.onGround then
+  elseif key == 97 and not down then
     anim:stop()
     idleanim:start()
     player1.move.left = false
 
-  elseif key == 97 and key == 100 then
+  elseif key == 97 and key == 100 and player1.onGround then
     player1.isIdle = true
+    player1.move.left = false 
+    player1.move.right = false
+  end
+--'W' key pressed for jump
+  if key == 119 and down and player1.onGround then
+    player1.jump = true
+    player1.onGround = false
+  end
+--'S' key pressed for ducking
+  if key == 115 and down and player1.jump then
+   --Placeholder for now
   end
 
-  if key == 119 and down and player1.onground then
-    player1.jump = true
-  end
 end
 
 playerThread = MOAIThread.new()
@@ -199,8 +207,6 @@ playerThread:run ( function()
         if player1.move.right and not player1.move.left then
           player1.isIdle = false
           anim:start()
-            --Ramp up speed by adding 1 to speed until it hits max velocity
-            if player1.speed < values.playerVelocity then player1.speed = player1.speed + 1 end
 
           --If the player gets to the edge of the screen going right, place him on the left edge
             if player1.x > values.resolutionWidth / 2 then
@@ -210,37 +216,22 @@ playerThread:run ( function()
         elseif player1.move.left and not player1.move.right then
           player1.isIdle = false
           anim:start()
-            --Ramp up speed by adding 1 to speed until it hits max velocity
-            if player1.speed < values.playerVelocity then player1.speed = player1.speed + 1 end
 
           --If the player gets to the edge of the screen going left, place him on the right edge
             if player1.x < -values.resolutionWidth / 2 then
               player1.x = values.resolutionWidth / 2 + values.playerScaleX / 2
             end
 
-        elseif not player1.move.left and not player1.move.right and player1.speed == 0 then
+        elseif not player1.move.left and not player1.move.right and player1.speed <= 0 then
           player1.isIdle = true
+        elseif player1.speed < 0 then player1.isIdle = true
+      
         end
-        
 
-        if player1.isIdle == false then
-            
-          if player1.facing.right then
-            player1.x = player1.x + player1.speed
-            player1.speed = player1.speed - values.windResistance / 2
-          else
-            player1.x = player1.x - player1.speed
-            player1.speed = player1.speed - values.windResistance / 2
-          end
-
-        
-        
-        
-
-
-        end
       end 
 
+      calculateGravity(player1)
+      calculateSpeed(player1)
       prop:setLoc(player1.x,player1.y)
       coroutine.yield()
     end 
@@ -248,20 +239,24 @@ end )
 
 
 
+
+
+
+
 ---Controller handler
 if (MOAIInputMgr.device.keyboard) then
-	MOAIInputMgr.device.keyboard:setCallback(
-		function(key,down)
-			if down then
+  MOAIInputMgr.device.keyboard:setCallback(
+    function(key,down)
+      if down then
         playerControl(key,down)
-      
-			else
+     
+      else
 
         playerControl(key,down)
         
-			end
-		end
-	)
+      end
+    end
+  )
 end
 
 
@@ -269,8 +264,7 @@ end
 debugThread = MOAIThread.new()
 debugThread:run( function()
     while true do
-      debug( {"Player1 Location: ", "X:",player1.x, "Y:", 
-        player1.y, "  Right:", player1.move.right, "  Left:",player1.move.left, "  Idle: ", player1.isIdle, "  Speed: ", player1.speed})
+      debug( {"Y: ", player1.y, "Right:", player1.move.right, "  Left:",player1.move.left, "  Idle: ", player1.isIdle, "   onGround:", player1.onGround})
       coroutine.yield() 
     end
       
@@ -279,3 +273,50 @@ end )
 
 initViewport()
 initGraphics(layer)
+
+
+
+
+
+
+function calculateGravity(player)
+
+        if player.jump == true then
+          player.jumpSpeed = values.playerForceUpwards
+          player.jump = false
+        end
+
+        if player.onGround == false then
+          player.y = player.y + player.jumpSpeed
+          player.jumpSpeed = player.jumpSpeed - values.gravity
+        end
+
+        if player.y <= -512 and player.jump == false then
+          player.onGround = true
+        end
+end
+
+
+---Function to calculate the speed of a player
+function calculateSpeed(player)
+      if player.move.right and not player.move.left then
+      --Ramp up speed by adding 1 to speed until it hits max velocity
+        if player.speed < values.playerSpeed then player.speed = player1.speed + 1 end
+
+      elseif player.move.left and not player.move.right then
+      --Ramp up speed by adding 1 to speed until it hits max velocity
+        if player.speed < values.playerSpeed then player.speed = player.speed + 1 end
+      
+      end
+
+      if player.isIdle == false then
+            
+          if player.facing.right then
+            player.x = player.x + player.speed
+            player.speed = player.speed - values.windResistance / 2
+          else
+            player.x = player.x - player.speed
+            player.speed = player.speed - values.windResistance / 2
+         end
+      end
+end

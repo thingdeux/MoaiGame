@@ -8,8 +8,9 @@ resolutionHeight = 1024
 playerScaleX = 250
 playerScaleY = 250
 
---Player's Max Velocity --Determines how fast they can go
-playerVelocity = 6
+--Player's Max Velocity --Determines how fast they can walk/run
+playerSpeed = 8
+playerForceUpwards = 40
 
 --World Variables
 windResistance = 1
