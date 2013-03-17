@@ -10,7 +10,7 @@ playerScaleY = 250
 
 --Player's Max Velocity --Determines how fast they can walk/run
 playerSpeed = 8
-playerForceUpwards = 40
+playerForceUpwards = 30
 
 --World Variables
 windResistance = 1
@@ -18,6 +18,7 @@ gravity = 2
 
 --Name of SpriteSheet (to be placed in the same directory)
 tilesheetlocation = "smurf_sprite.png"
+backgroundtilesheetlocation = ""
 
 --How many images are on each row of the main tilesheet
 tilesheet_rows_across = 4
