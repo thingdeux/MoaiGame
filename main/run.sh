@@ -1,3 +1,4 @@
 #!/bin/bash
+cd "$_/ ../"
 
-../../../bin/osx/moai "../../config/config.lua" "main.lua"
+/Developer/Lua/moai-sdk/bin/osx/moai "config.lua" "main.lua"

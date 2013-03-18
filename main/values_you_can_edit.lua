@@ -1,8 +1,8 @@
 module(..., package.seeall);
 
 --Set Screen/Resolution Size
-resolutionWidth = 1280
-resolutionHeight = 1024
+resolutionWidth = 1024
+resolutionHeight = 768
 
 --Player Size Control (Smaller numbers = smaller character)
 playerScaleX = 250
