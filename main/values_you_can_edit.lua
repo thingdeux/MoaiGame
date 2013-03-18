@@ -13,7 +13,7 @@ playerSpeed = .8
 playerForceUpwards = 60
 
 --World Variables
-windResistance = .25
+windResistance = 1
 gravity = 2
 
 --Name of SpriteSheet (to be placed in the same directory)
@@ -33,13 +33,13 @@ idle_animation_keyframes = 1
 --Set the animation order and time between frames
 --Structure (Order # In Animation, Time Delay, Frame to Pull on the Sheet, MOAItransitionStyle)
 curvekeys = {
-				  { 1, 0.00, 1, 'MOAIEaseType.FLAT' },
-				  { 2, 0.50, 3, 'MOAIEaseType.FLAT' },
-  				{ 3, 1.0, 5, 'MOAIEaseType.FLAT' },
-  				{ 4, 1.50, 7, 'MOAIEaseType.FLAT' },
-  				{ 5, 2.0, 10, 'MOAIEaseType.FLAT' },
-  				{ 6, 2.50, 11, 'MOAIEaseType.FLAT' },
-			{ 7, 2.55, 1, 'MOAIEaseType.FLAT' },
+				  { 1, 0.10, 1, 'MOAIEaseType.FLAT' },
+				  { 2, 0.20, 3, 'MOAIEaseType.FLAT' },
+  				{ 3, .30, 5, 'MOAIEaseType.FLAT' },
+  				{ 4, .40, 7, 'MOAIEaseType.FLAT' },
+  				{ 5, .50, 10, 'MOAIEaseType.FLAT' },
+  				{ 6, .60, 11, 'MOAIEaseType.FLAT' },
+			{ 7, 0.70, 1, 'MOAIEaseType.FLAT' },
   				
 
 			}
