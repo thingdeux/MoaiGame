@@ -2,7 +2,7 @@ module(..., package.seeall);
 
 function set_player_vars(player)
   player.x = -510
-  player.y = -512
+  player.y = -590
   player.speed = 0
   player.jumpSpeed = 0
   
@@ -57,13 +57,27 @@ function playercontrol(key, down)
   if key == 119 and down and player1.onGround then
     player1.jump = true
     player1.onGround = false
-    
   end
+
 --'S' key pressed for ducking
   if key == 115 and down then
    --Placeholder for now
-   camera:moveScl(.2, .2, 5)
+  -- camera:moveScl(.2, .2, 5)
+  end
 
+--'e' key pressed for starting animation
+  if key == 101 and down then
+    anim:start()  
+  end
+
+--'q' key pressed for stopping animation
+  if key == 113 and down then
+    anim:stop()
+  end
+
+--'c' key pressed to play with the camera
+  if key == 99 and down then
+    camera:moveScl(.2, .2, 4)
   end
 
 end
@@ -130,7 +144,7 @@ function calculateGravity(player)
           player.jumpSpeed = player.jumpSpeed - values.gravity
         end
 
-        if player.y <= -512 and player.jump == false then
+        if player.y <= -590 and player.jump == false then
           player.onGround = true
         end
 end

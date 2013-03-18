@@ -182,7 +182,7 @@ debugThread = MOAIThread.new()
 debugThread:run( function()
     while true do
       debug( {"Speed: ", player1.speed, "Idle: ", player1.isIdle})
-      coroutine.yield() 
+      coroutine.yield()
     end
       
 end )
