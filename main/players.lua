@@ -2,7 +2,7 @@ module(..., package.seeall);
 
 function set_player_vars(player)
   player.x = -510
-  player.y = -590
+  player.y = -450
   player.speed = 0
   player.jumpSpeed = 0
   
