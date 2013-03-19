@@ -13,7 +13,7 @@ function loadLevel()
 
 
   mapTileDeck = MOAITileDeck2D.new()
-  mapTileDeck:setTexture("MapTiles.png")
+  mapTileDeck:setTexture(values.backgroundtilesheetlocation)
   mapTileDeck:setSize(16,16)
 
   map_Prop = MOAIProp2D.new()

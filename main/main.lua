@@ -78,13 +78,14 @@ function initGraphics()
       local builder = {}
     for key,value in pairs(values) do
         builder[#builder + 1] = value
+        print ("Rolled for: " .. tostring(value) )
     end
   animobj:setKey(builder[1], builder[2], builder[3], builder[4])
   end
 end
  
   set_animation_keys(curve,values.curvekeys)
-  set_animation_keys(idlecurve,values.idle_curvekeys)
+  --set_animation_keys(idlecurve,values.idle_curvekeys)
 
   anim = MOAIAnim:new ()
   anim:reserveLinks ( 1 )
